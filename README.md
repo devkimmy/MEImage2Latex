@@ -35,61 +35,25 @@ Data link: https://www.kaggle.com/xainano/handwrittenmathsymbols
 
 <img src="./img_src/examples/2_0.png" height="100px" width="300px" align="left">  
 
-
-
 <img src="./img_src/examples/2_1.png" height="100px" width="300px" align="left">  
-
-
 
 <img src="./img_src/examples/2_2.png" height="100px" width="300px" align="left">  
 
-
-
-
-
-
-
-
-
 <img src="./img_src/examples/3_0.png" height="100px" width="300px" align="left">  
-
-
 
 <img src="./img_src/examples/3_1.png" height="100px" width="300px" align="left">  
 
-
-
-<img src="./img_src/examples/3_2.png" height="100px" width="300px" align="left">
-
-
-
-
-
-
+<img src="./img_src/examples/3_2.png" height="100px" width="300px" align="left">  
 
 <img src="./img_src/examples/4_0.png" height="100px" width="300px" align="left">  
 
-
-
 <img src="./img_src/examples/4_1.png" height="100px" width="300px" align="left">  
 
-
-
-<img src="./img_src/examples/4_2.png" height="100px" width="300px" align="left">
-
-
-
-
-
-
+<img src="./img_src/examples/4_2.png" height="100px" width="300px" align="left">  
 
 <img src="./img_src/examples/5_0.png" height="100px" width="300px" align="left">  
 
-
-
 <img src="./img_src/examples/5_1.png" height="100px" width="300px" align="left">  
-
-
 
 <img src="./img_src/examples/5_2.png" height="100px" width="300px" align="left">
 
