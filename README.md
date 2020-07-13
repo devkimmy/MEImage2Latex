@@ -29,6 +29,8 @@ CNN model for single character classification. Modified from vgg16.
 
 Used handwritting mathematic symbol data for train this model.
 
+Pretrained-model: https://drive.google.com/file/d/1476mU1ycv5WUfJBnjWzImeOrfqoiHOUF/view?usp=sharing
+
 Data link: https://www.kaggle.com/xainano/handwrittenmathsymbols
 
 ## Examples

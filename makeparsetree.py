@@ -2,76 +2,78 @@ def set_fraction(compounds):
     compound = []
     i = 0
     while i < len(compounds):
-        box1 = compounds[i]
-        if box1['did']:
-            i += 1
-            continue
-        # 마지막 문자 && compound에 속해 있지 않는 경우 compound에 넣고 종료
-        if i == len(compounds) - 1:
-            box1['did'] = True
-            compound.append({
-                'class': 'normal',
-                'symbol': box1['symbol'],
-                'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
-                'up': [],
-                'down': [],
-                'inner': []
-            })
-            i += 1
-            continue
-
-        # if fraction symbol is detected, divide up, down while changing 'did' flags
-        up = []
-        down = []
-        if box1['symbol'] == '-':
-            # 현재위치부터 < 끝까지
-            while i < len(compounds) - 1:
-                box2 = compounds[i + 1]
-                if box2['did']:
-                    continue
-                if box1['xmax'] >= box2['xmax'] and box1['xmin'] <= box2['xmin']:
-                    if box1['ymin'] < box2['ymin']:
-                        down.append(box2.copy())
-                    else:
-                        up.append(box2.copy())
-                    box2['did'] = True
+        now = compounds[i]
+        if now['did'] == False and now['symbol'] == '-':
+            nowX = (now['xmin'] + now['xmax']) / 2
+            nowY = (now['ymin'] + now['ymax']) / 2
+            j = i
+            while True:
+                if j == 0: break
+                prev = compounds[j - 1]
+                if prev['did']: break
+                prevX = (prev['xmin'] + prev['xmax']) / 2
+                prevY = (prev['ymin'] + prev['ymax']) / 2
+                if now['xmin'] <= prevX and now['xmax'] >= prevX:
+                    j -= 1
                 else:
                     break
-                i += 1
-        if len(up) == 0 and len(down) == 0:
-            box1['did'] = True
+            up = []
+            up_tmp = []
+            down = []
+            down_tmp = []
+            while j < len(compounds):
+                if j != i:
+                    check = compounds[j]
+                    checkX = (check['xmin'] + check['xmax']) / 2
+                    checkY = (check['ymin'] + check['ymax']) / 2
+                    if now['xmin'] <= checkX <= now['xmax']:
+                        if now['ymax'] < checkY and now['ymax'] < checkY:
+                            down.append(check)
+                            down_tmp.append(check.copy())
+                        elif now['ymax'] > checkY and now['ymin'] > checkY:
+                            up.append(check)
+                            up_tmp.append(check.copy())
+                        else:
+                            break
+
+                j += 1
+            if len(up) != 0 and len(down) != 0:
+                for d in down:
+                    d['did'] = True
+                for u in up:
+                    u['did'] = True
+                now['did'] = True
+                up = set_fraction(up_tmp)
+                down = set_fraction(down_tmp)
+                compound.append({
+                    'class': 'fraction',
+                    'symbol': '-',
+                    'did': False,
+                    'xmin': now['xmin'],
+                    'xmax': now['xmax'],
+                    'ymin': now['ymin'],
+                    'ymax': now['ymax'],
+                    'up': up,
+                    'down': down,
+                    'inner': [],
+                })
+        i += 1
+    for i in range(0, len(compounds)):
+        now = compounds[i]
+        if not now['did']:
             compound.append({
                 'class': 'normal',
-                'symbol': box1['symbol'],
+                'symbol': now['symbol'],
                 'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': [],
                 'down': [],
-                'inner': []
-            })
-        else:
-            up = set_fraction(up)
-            down = set_fraction(down)
-            compound.append({
-                'class': 'fraction',
-                'symbol': '-',
-                'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
-                'up': up,
-                'down': down,
                 'inner': [],
             })
-        i += 1
+        compound = sorted(compound, key=lambda k: (k['xmin'], k['ymin']))
     return compound
 
 
@@ -79,36 +81,36 @@ def set_square_root(bonding_boxes):
     compound = []
     i = 0
     while i < len(bonding_boxes):
-        box1 = bonding_boxes[i]
-        if box1['did']:
+        now = bonding_boxes[i]
+        if now['did']:
             i += 1
             continue
-        elif box1['class'] == 'fraction':
+        elif now['class'] == 'fraction':
             compound.append({
                 'class': 'fraction',
                 'symbol': '-',
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'did': False,
-                'up': set_square_root(box1['up']),
-                'down': set_square_root(box1['down']),
+                'up': set_square_root(now['up']),
+                'down': set_square_root(now['down']),
                 'inner': [],
             })
             i += 1
             continue
         # 마지막 문자 && compound에 속해 있지 않는 경우 compound에 넣고 종료
         if i == len(bonding_boxes) - 1:
-            box1['did'] = True
+            now['did'] = True
             compound.append({
                 'class': 'normal',
                 'did': False,
-                'symbol': box1['symbol'],
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'symbol': now['symbol'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': [],
                 'down': [],
                 'inner': [],
@@ -118,27 +120,35 @@ def set_square_root(bonding_boxes):
         # square root를 재귀적으로 짜야한다.
         inner = []
         while i < len(bonding_boxes) - 1:
-            box2 = bonding_boxes[i + 1]
-            if box2['did']:
+            later = bonding_boxes[i + 1]
+            if later['did']:
                 continue
-            if box1['xmin'] < box2['xmin'] and box1['ymin'] < box2['ymin'] and \
-                    box1['xmax'] > box2['xmax'] and box1['ymax'] > box2['ymax']:
-                inner.append(box2.copy())
-                box2['did'] = True
+            laterX = (later['xmin'] + later['xmax']) / 2
+            laterY = (later['ymin'] + later['ymax']) / 2
+            if now['xmin'] <= laterX <= now['xmax'] and now['ymin'] <= laterY <= now['ymax']:
+                inner.append(later.copy())
+                later['did'] = True
             else:
                 break
             i += 1
+            # if now['xmin'] < later['xmin'] and now['ymin'] < later['ymin'] and \
+            #         now['xmax'] > later['xmax'] and now['ymax'] > later['ymax']:
+            #     inner.append(later.copy())
+            #     later['did'] = True
+            # else:
+            #     break
+            # i += 1
 
         if len(inner) == 0:
-            box1['did'] = True
+            now['did'] = True
             compound.append({
                 'class': 'normal',
-                'symbol': box1['symbol'],
+                'symbol': now['symbol'],
                 'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': [],
                 'down': [],
                 'inner': []
@@ -148,10 +158,10 @@ def set_square_root(bonding_boxes):
                 'class': 'square_root',
                 'symbol': '√',
                 'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': [],
                 'down': [],
                 'inner': set_square_root(inner),
@@ -164,104 +174,99 @@ def set_script(compounds):
     compound = []
     i = 0
     while i < len(compounds):
-        box1 = compounds[i]
-        if box1['did']:
+        now = compounds[i]
+        if now['did']:
             i += 1
             continue
-        elif box1['class'] == 'fraction':
+        elif now['class'] == 'fraction':
             compound.append({
                 'class': 'fraction',
                 'symbol': '-',
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'did': False,
-                'up': set_script(box1['up']),
-                'down': set_script(box1['down']),
+                'up': set_script(now['up']),
+                'down': set_script(now['down']),
                 'inner': [],
             })
             i += 1
             continue
-        elif box1['class'] == 'square_root':
+        elif now['class'] == 'square_root':
             compound.append({
                 'class': 'square_root',
                 'symbol': '√',
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'did': False,
                 'up': [],
                 'down': [],
-                'inner': set_script(box1['inner']),
+                'inner': set_script(now['inner']),
             })
             i += 1
             continue
         # 마지막 문자 && compound에 속해 있지 않는 경우 compound에 넣고 종료
-        if i == len(compounds) - 1:
-            box1['did'] = True
-            compound.append({
-                'class': 'normal',
-                'did': False,
-                'symbol': box1['symbol'],
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
-                'up': [],
-                'down': [],
-                'inner': [],
-            })
-            i += 1
-            continue
+        # if i == len(compounds) - 1:
+        #     now['did'] = True
+        #     compound.append({
+        #         'class': 'normal',
+        #         'did': False,
+        #         'symbol': now['symbol'],
+        #         'xmin': now['xmin'],
+        #         'xmax': now['xmax'],
+        #         'ymin': now['ymin'],
+        #         'ymax': now['ymax'],
+        #         'up': [],
+        #         'down': [],
+        #         'inner': [],
+        #     })
+        #     i += 1
+        #     continue
 
             # if fraction symbol is detected, divide up, down while changing 'did' flags
         up = []
-        down = []
         while i < len(compounds) - 1:
-            box2 = compounds[i + 1]
-            if box2['did']:
+            later = compounds[i + 1]
+            if later['did']:
                 continue
             k = 0.5
-            if box1['ymin'] >= box2['ymin'] and box1['ymin'] + k * (box1['ymax'] - box1['ymin']) >= box2['ymax']:
-                up.append(box2.copy())
-                box2['did'] = True
-            elif box1['ymax'] <= box2['ymax'] and box1['ymax'] - k * (box1['ymax'] - box1['ymin']) <= box2['ymin']:
-                down.append(box2.copy())
-                box2['did'] = True
+            if now['ymin'] >= later['ymin'] and now['ymin'] + k * (now['ymax'] - now['ymin']) >= later['ymax']:
+                up.append(later.copy())
+                later['did'] = True
             else:
                 break
             i += 1
 
-        if len(up) == 0 and len(down) == 0:
-            box1['did'] = True
+        if len(up) == 0:
+            now['did'] = True
             compound.append({
                 'class': 'normal',
-                'symbol': box1['symbol'],
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'symbol': now['symbol'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': [],
                 'down': [],
                 'inner': [],
                 'did': False,
             })
         else:
-            box1['did'] = True
+            now['did'] = True
             up = set_script(up)
-            down = set_script(down)
             compound.append({
                 'class': 'script',
-                'symbol': box1['symbol'],
+                'symbol': now['symbol'],
                 'did': False,
-                'xmin': box1['xmin'],
-                'xmax': box1['xmax'],
-                'ymin': box1['ymin'],
-                'ymax': box1['ymax'],
+                'xmin': now['xmin'],
+                'xmax': now['xmax'],
+                'ymin': now['ymin'],
+                'ymax': now['ymax'],
                 'up': up,
-                'down': down,
+                'down': [],
                 'inner': [],
             })
         i += 1
@@ -279,21 +284,17 @@ def print_compounds(compounds):
             classification = compound['class']
             symbol = compound['symbol']
             if classification == 'fraction':
-                ret += '\\frac{'
+                ret += '!frac{'
                 ret += print_compounds(up)
                 ret += "}{"
                 ret += print_compounds(down)
                 ret += "}"
             elif classification == 'square_root':
-                ret += '\\sqrt{'
+                ret += '!sqrt{'
                 ret += print_compounds(inner)
                 ret += "}"
             elif classification == 'script':
                 ret += symbol
-                if len(down) != 0:
-                    ret += '_{'
-                    ret += print_compounds(down)
-                    ret += '}'
                 if len(up) != 0:
                     ret += '^{'
                     ret += print_compounds(up)
